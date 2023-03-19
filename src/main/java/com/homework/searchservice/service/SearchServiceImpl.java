@@ -4,16 +4,20 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homework.searchservice.dto.KakaoRequestDto;
 import com.homework.searchservice.dto.KakaoResponseDto;
+import com.homework.searchservice.dto.NaverRequestDto;
 import com.homework.searchservice.dto.part.DocumentDto;
 import com.homework.searchservice.dto.part.MetaDto;
 import com.homework.searchservice.dto.basic.SearchRequestDto;
 import com.homework.searchservice.dto.basic.SearchResponseDto;
+import com.homework.searchservice.entity.Search;
+import com.homework.searchservice.repository.SearchRepository;
 import lombok.AllArgsConstructor;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,14 +31,19 @@ import java.util.List;
 public class SearchServiceImpl implements SearchService{
     Environment env;
 
+    SearchRepository searchRepository;
+
     @Override
+    @Transactional
     public SearchResponseDto search(SearchRequestDto searchDto) {
         switch (searchDto.getSearchSourceType()) {
-            case KAKAO :
+            case NAVER :
+                return searchViaNaver((NaverRequestDto)searchDto);
+            default:
                 return searchViaKakao((KakaoRequestDto)searchDto);
         }
-        return null;
     }
+
 
     private SearchResponseDto searchViaKakao(KakaoRequestDto searchDto)  {
 
@@ -57,7 +66,8 @@ public class SearchServiceImpl implements SearchService{
             if(responseCode == 200) {
                 is = new InputStreamReader(urlConnection.getInputStream());
             } else {
-                is = new InputStreamReader(urlConnection.getErrorStream());
+                //is = new InputStreamReader(urlConnection.getErrorStream());
+                // 실패시 네이버
             }
             br = new BufferedReader(is);
             final StringBuffer buffer = new StringBuffer();
@@ -77,6 +87,20 @@ public class SearchServiceImpl implements SearchService{
 
             JSONArray documentsJson = resultJson.getJSONArray("documents");
             List<DocumentDto> documents = Arrays.asList(mapper.readValue(documentsJson.toString(), DocumentDto[].class));
+
+            Search findSearch = searchRepository.findByKeyword(searchDto.getQuery());
+
+            if(findSearch == null) {
+                Search newSearch = Search.SearchBuilder()
+                        .searchCnt(1L)
+                        .keyword(searchDto.getQuery())
+                        .build();
+
+                searchRepository.save(newSearch);
+            } else {
+                searchRepository.increaseSearchCnt(findSearch.getKeyword());
+            }
+
             return KakaoResponseDto.KakaoResponseDtoBuilder()
                     .meta(meta)
                     .documents(documents)
@@ -86,4 +110,10 @@ public class SearchServiceImpl implements SearchService{
         }
 
     }
+
+    private SearchResponseDto searchViaNaver(NaverRequestDto searchDto) {
+        return null;
+    }
+
+
 }
