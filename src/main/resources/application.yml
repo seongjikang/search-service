@@ -27,3 +27,5 @@ search:
     admin-key: ecfaa730aced1762c3d2cfe5aa37bcc3
   naver:
     url: https://openapi.naver.com/v1/search/blog.json
+    client-id: uyODjAXWeVNmAg0hcYqf
+    client-secret : U1ouaO8yJB

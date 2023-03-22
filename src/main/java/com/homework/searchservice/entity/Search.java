@@ -1,5 +1,6 @@
 package com.homework.searchservice.entity;
 
+import com.homework.searchservice.dto.basic.SearchResponseDto;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
@@ -32,4 +33,12 @@ public class Search {
         this.keyword = keyword;
         this.searchCnt = searchCnt;
     }
+
+    public SearchResponseDto toDto(){
+        return  SearchResponseDto.SearchResponseDtoBuilder()
+                .searchCnt(searchCnt)
+                .keyword(keyword)
+                .build();
+    }
+
 }
