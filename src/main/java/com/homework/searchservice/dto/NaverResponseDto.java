@@ -4,10 +4,12 @@ import com.homework.searchservice.dto.basic.SearchResponseDto;
 import com.homework.searchservice.dto.part.ItemDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class NaverResponseDto extends SearchResponseDto {
     private String lastBuildDate;
     private Integer total;

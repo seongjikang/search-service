@@ -5,10 +5,12 @@ import com.homework.searchservice.dto.part.DocumentDto;
 import com.homework.searchservice.dto.part.MetaDto;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class KakaoResponseDto extends SearchResponseDto {
    private MetaDto meta;
    private List<DocumentDto> documents;
